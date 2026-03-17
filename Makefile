@@ -57,6 +57,25 @@ status:
 		fi; \
 	done
 
+## devcontainer.json に追加する mounts 設定を出力する
+devcontainer:
+	@rel=$$(echo "$(REPO_DIR)" | sed "s|^$(HOME)/||"); \
+	printf 'Add the following "mounts" to your .devcontainer/devcontainer.json:\n\n'; \
+	printf '{\n'; \
+	printf '  "mounts": [\n'; \
+	targets="$(CLAUDE_TARGETS)"; \
+	last=$$(echo $$targets | tr ' ' '\n' | tail -1); \
+	for target in $$targets; do \
+		entry="\"source=\$${localEnv:HOME}/$$rel/.claude/$$target,target=/home/node/.claude/$$target,type=bind,consistency=cached\""; \
+		if [ "$$target" = "$$last" ]; then \
+			printf '    %s\n' "$$entry"; \
+		else \
+			printf '    %s,\n' "$$entry"; \
+		fi; \
+	done; \
+	printf '  ]\n'; \
+	printf '}\n'
+
 help:
 	@echo "Usage:"
 	@echo "  make link    グローバル ~/.claude へシンボリックリンクを作成"
